@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<html>
+
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+  </script>
+  <script language="javascript" type="text/javascript">
+    $(function () {
+      var conn = null;
+      function log(msg) {
+        var control = $('#log');
+        control.html(control.html() + msg + '<br/>');
+        control.scrollTop(control.scrollTop() + 1000);
+      }
+      function connect() {
+        disconnect();
+        var wsUri = (window.location.protocol == 'https:' && 'wss://' || 'ws://') + window.location.host;
+        conn = new WebSocket(wsUri);
+        log('Entering queue...');
+        conn.onopen = function () {
+          log('Queued.');
+          update_ui();
+        };
+        conn.onclose = function () {
+          log('Not queued.');
+          conn = null;
+          update_ui();
+        };
+      }
+      function disconnect() {
+        if (conn != null) {
+          log('Leaving queue...');
+          conn.close();
+          conn = null;
+          update_ui();
+        }
+      }
+      function update_ui() {
+        if (conn == null) {
+          $('#status').text('Not queued');
+          $('#connect').html('Play game!');
+        } else {
+          $('#status').text('In queue');
+          $('#connect').html('Leave queue');
+        }
+      }
+      $('#connect').click(function () {
+        if (conn == null) {
+          connect();
+        } else {
+          disconnect();
+        }
+        update_ui();
+        return false;
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <h3>Lobby</h3>
+  <div>
+    <button id="connect">Play game!</button>&nbsp;|&nbsp;Status:
+    <span id="status">Not queued</span>
+  </div>
+  <div id="log" style="width:20em;height:15em;overflow:auto;border:1px solid black">
+  </div>
+</body>
+
+</html>
