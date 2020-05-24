@@ -16,9 +16,9 @@ async def wshandler(request):
     await resp.prepare(request)
 
     try:
-        print("Someone joined.")
+        print("New player joined.")
         for ws in request.app["sockets"]:
-            await ws.send_str("Someone joined")
+            await ws.send_str("New player joined")
         request.app["sockets"].append(resp)
 
         async for msg in resp:
