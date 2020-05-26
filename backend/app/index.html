@@ -20,7 +20,17 @@
         log('Entering queue...');
         conn.onopen = function () {
           log('Queued.');
-          update_ui();
+          update_ui("in_queue");
+        };
+        conn.onmessage = function(e) {
+          log('Received: ' + e.data);
+          if (e.data.action == "game_start") {
+            update_ui("game_start");
+          } else if (e.data.action == "round_result") {
+            update_ui("round_result");
+          } else if (e.data.action == "game_result") {
+            update_ui("game_result");
+          }
         };
         conn.onclose = function () {
           log('Not queued.');
@@ -36,13 +46,19 @@
           update_ui();
         }
       }
-      function update_ui() {
+      function update_ui(event) {
+        console.log(event);
         if (conn == null) {
           $('#status').text('Not queued');
           $('#connect').html('Play game!');
         } else {
-          $('#status').text('In queue');
-          $('#connect').html('Leave queue');
+          if (event == "game_start") {
+            $('#status').text('In game');
+            $('#connect').html('Leave game');
+          } else if (event == "game_result") {
+            $('#status').text('Game finished');
+            $('#connect').html('Play game!');
+          }
         }
       }
       $('#connect').click(function () {
@@ -54,6 +70,12 @@
         update_ui();
         return false;
       });
+      $('#send').click(function() {
+        var weapon = $('#weapon').val();
+        log('Sending: ' + weapon);
+        conn.send(weapon);
+        return false;
+      });
     });
   </script>
 </head>
@@ -61,11 +83,20 @@
 <body>
   <h3>Lobby</h3>
   <div>
+    <input type="text" name="name" id="name">
     <button id="connect">Play game!</button>&nbsp;|&nbsp;Status:
     <span id="status">Not queued</span>
   </div>
   <div id="log" style="width:20em;height:15em;overflow:auto;border:1px solid black">
   </div>
+  <form id="choice_form" onsubmit="return false;">
+    <select id="weapon" name="weapon">
+      <option value="rock">Rock</option>
+      <option value="paper">Paper</option>
+      <option value="scissors">Scissors</option>
+    </select>
+    <input id="send" type="button" value="Send" />
+  </form>
 </body>
 
 </html>

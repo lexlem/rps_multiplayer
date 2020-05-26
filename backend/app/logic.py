@@ -61,7 +61,7 @@ class Choice(Enum):
 
 @dataclass
 class Options:
-    countdown_duration: float = 3.0
+    countdown_duration: float = 10
     rounds: int = 3
     threshold: float = 0.5
 
@@ -76,10 +76,10 @@ class Options:
 
 @dataclass(eq=False)
 class Player:
-    choice: Optional[Choice] = field(init=False)
+    choice: Optional[Choice] = None
     name: str = "Player"
-    ws: web.WebSocketResponse = field(init=False)
-    room: GameRoom = field(init=False)
+    ws: Optional[web.WebSocketResponse] = None
+    game: Optional["Game"] = None
 
     def get_selected_weapon(self) -> Optional[Weapon]:
         return cast(Weapon, self.choice.value) if self.choice else None
@@ -147,7 +147,7 @@ class Round:
 
 @dataclass
 class GameRoom:
-    _players: Set[Player] = set()
+    _players: Set[Player] = field(init=False)
 
     @staticmethod
     def get(room_id):
@@ -172,7 +172,7 @@ class GameRoom:
 class Game:
     def __init__(self, players):
         self.options = Options()
-        self.players = [Player(name=player.name) for player in players]
+        self.players = players
         self.winner: Optional[Player] = None
         self.rounds: List[Round] = []
         self.current_round: Union[Round, None]
