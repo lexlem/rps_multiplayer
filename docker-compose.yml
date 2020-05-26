@@ -1,0 +1,9 @@
+version: "3"
+services:
+  backend:
+    build: ./backend
+    command: python app/main.py
+    volumes:
+      - ./backend:/app
+    ports:
+      - 8080:8080
