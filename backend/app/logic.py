@@ -31,23 +31,55 @@ class Weapon:
     can_crush: bool = False
     can_cut: bool = False
 
+    def __key(self):
+        return (
+            self.cuttable,
+            self.wrappable,
+            self.crushable,
+            self.can_wrap,
+            self.can_crush,
+            self.can_cut,
+        )
+
+    def __hash__(self):
+        return hash(self.__key())
+
+    def __eq__(self, other):
+        if isinstance(other, Weapon):
+            return self.__key() == other.__key()
+        return NotImplemented
+
     def encounter(self, weapons: List["Weapon"]) -> Result:
-        result = self.lose(weapons) or self.draw(weapons) or Result.WIN
+        result = self.draw(weapons) or self.lose(weapons) or Result.WIN
         assert result is not None
         return result
 
     def draw(self, weapons: List["Weapon"]) -> Optional[Result]:
-        return (
-            Result.DRAW if (len(set(weapons)) <= 1 or len(set(weapons)) == 3) else None
-        )
+        if len(weapons) == 1:
+            return Result.DRAW if self == weapons[0] else None
+        else:
+            all_weapons = weapons[:]
+            all_weapons.append(self)
+            return (
+                Result.DRAW
+                if (
+                    len(set(all_weapons)) <= 1
+                    or (
+                        any(weapon.can_cut for weapon in all_weapons)
+                        and any(weapon.can_crush for weapon in all_weapons)
+                        and any(weapon.can_wrap for weapon in all_weapons)
+                    )
+                )
+                else None
+            )
 
     def lose(self, weapons: List["Weapon"]) -> Optional[Result]:
         return (
             Result.LOSE
             if (
-                (self.cuttable and all(weapon.can_cut for weapon in weapons))
-                or (self.crushable and all(weapon.can_crush for weapon in weapons))
-                or (self.wrappable and all(weapon.can_wrap for weapon in weapons))
+                (self.cuttable and any(weapon.can_cut for weapon in weapons))
+                or (self.crushable and any(weapon.can_crush for weapon in weapons))
+                or (self.wrappable and any(weapon.can_wrap for weapon in weapons))
             )
             else None
         )
@@ -84,19 +116,20 @@ class Player:
     def get_selected_weapon(self) -> Optional[Weapon]:
         return cast(Weapon, self.choice.value) if self.choice else None
 
-    def set_choice(self, choice_choice: Choice) -> None:
-        self.choice = choice_choice
+    def set_choice(self, choice: Choice) -> None:
+        self.choice = choice
 
     def reset_choice(self) -> None:
         self.choice = None
 
 
 class Round:
-    timings: DefaultDict[Player, float] = defaultdict(float)
+    timings: DefaultDict[Player, float] = defaultdict()
 
     def __init__(self, players: List[Player], options: Options):
         self.players = players
-        map(lambda player: player.reset_choice, self.players)
+        for player in self.players:
+            player.reset_choice()
         self.options = options
         self.winners: List[Player] = []
         self.draw: bool = False
@@ -108,9 +141,12 @@ class Round:
 
     def finalize(self) -> None:
         if not self.find_winner_by_timing():
-            weapons = [player.get_selected_weapon() for player in self.players]
+            weapons = {player: player.get_selected_weapon() for player in self.players}
             for player in self.players:
-                player_result = player.get_selected_weapon().encounter(weapons)
+                enemy_weapons = [
+                    weapon for enemy, weapon in weapons.items() if enemy != player
+                ]
+                player_result = player.get_selected_weapon().encounter(enemy_weapons)
                 if player_result == Result.WIN:
                     self.winners.append(player)
                 elif player_result == Result.DRAW:
@@ -120,9 +156,9 @@ class Round:
     def played_on_time(self, player: Player, end_time: float) -> bool:
         NO_TIME = 0
         return (
-            end_time - self.options.threshold
+            end_time - self.options.countdown_duration
             < self.timings.get(player, NO_TIME)
-            < end_time + self.options.threshold
+            < end_time
         )
 
     def find_winner_by_timing(self) -> bool:
@@ -143,30 +179,15 @@ class Round:
             else:
                 return False
         return bool(self.winners or self.draw)
-
-
-@dataclass
-class GameRoom:
-    _players: Set[Player] = field(init=False)
-
-    @staticmethod
-    def get(room_id):
-        return room_id
-
-    def send_all(self, message: str, except_: List[Player]) -> None:
-        for player in self.players:
-            if player not in except_:
-                player.ws.send_str(message)
-
-    @property
-    def players(self):
-        return frozenset(self._players)
-
-    def add_player(self, player: Player) -> None:
-        self._players.add(player)
-
-    def remove_player(self, player: Player) -> None:
-        self._players.remove(player)
+    
+    def get_player_round_result(self, player: Player) -> Result:
+        if self.draw == True:
+            return Result.DRAW
+        else:
+            if player in self.winners:
+                return Result.WIN
+            else:
+                return Result.LOSE
 
 
 class Game:
@@ -176,6 +197,8 @@ class Game:
         self.winner: Optional[Player] = None
         self.rounds: List[Round] = []
         self.current_round: Union[Round, None]
+        for player in players:
+            player.game = self
 
     def set_options(self, **kwargs: Any) -> None:
         self.options.set(**kwargs)
@@ -186,7 +209,7 @@ class Game:
     def all_players_played(self) -> bool:
         return all([player.choice for player in self.players])
 
-    def play(self, choice: Choice, player: Player) -> None:
+    async def play(self, choice: Choice, player: Player) -> None:
         if self.current_round:
             self.current_round.play(player, choice)
 
@@ -227,7 +250,10 @@ class Game:
     def get_player_result(self, player: Player) -> Result:
         player_wins = self.get_number_of_wins(player)
         max_wins = max([self.get_number_of_wins(player) for player in self.players])
-        if player_wins == max_wins:
-            return Result.WIN
+        if max_wins == 0:
+            return Result.DRAW
         else:
-            return Result.LOSE
+            if player_wins == max_wins:
+                return Result.WIN
+            else:
+                return Result.LOSE

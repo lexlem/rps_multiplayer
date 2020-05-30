@@ -22,7 +22,7 @@
           log('Queued.');
           update_ui("in_queue");
         };
-        conn.onmessage = function(e) {
+        conn.onmessage = function (e) {
           log('Received: ' + e.data);
           if (e.data.action == "game_start") {
             update_ui("game_start");
@@ -70,10 +70,10 @@
         update_ui();
         return false;
       });
-      $('#send').click(function() {
+      $('#send').click(function () {
         var weapon = $('#weapon').val();
         log('Sending: ' + weapon);
-        conn.send(weapon);
+        conn.send(JSON.stringify({ "action": "choice", "message": weapon }));
         return false;
       });
     });

@@ -41,21 +41,15 @@ class GameHelper:
                 await self.send_single(
                     message={
                         "action": "round_result",
-                        "message": self.game.get_player_result(player=player).value,
+                        "message": self.previous_round.get_player_round_result(
+                            player=player
+                        ).value,
                     },
                     player=player,
                 )
 
     async def play(self, choice: Choice, player: Player) -> None:
         self.game.play(choice, player)
-
-    # async def handle_choice(self, player: Player) -> None:
-    #     async for msg in player.ws:
-    #         if msg.data["action"] == "choice":
-    #             self.play(Choice(msg.data["message"]).value, player)
-
-    # async def handle_choice(self, choice: str, player: Player) -> None:
-    #     self.play(Choice(choice).value, player)
 
     async def get_player_stats(self, player: Player) -> None:
         played_rounds = len(self.game.rounds) or 1
@@ -72,13 +66,16 @@ class GameHelper:
             player=player,
         )
 
+    async def send_players_stats(self) -> None:
+        for player in self.game.players:
+            await self.get_player_stats(player)
+
     async def start_game(self, app: Any) -> None:
         last_loop_is_required = True
         while self.game.is_running() or last_loop_is_required:
             last_loop_is_required = self.game.is_running()
             await self.finalize_round()
-            # for player in self.game.players:
-            #     await self.get_player_stats(player)
+            # await self.send_players_stats()
             await self.start_next_round()
 
     async def send_single(self, message: Dict[str, Any], player: Player) -> None:

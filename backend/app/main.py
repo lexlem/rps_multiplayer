@@ -1,7 +1,9 @@
 import asyncio
 from aiohttp import web
+from aiojobs.aiohttp import setup
 
 from views import wshandler
+from config import GAME_PLAYERS_COUNT
 
 
 async def on_shutdown(app):
@@ -19,4 +21,5 @@ def init():
 
 
 app = init()
+setup(app)
 web.run_app(app)
