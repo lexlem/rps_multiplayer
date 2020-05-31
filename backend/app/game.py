@@ -1,9 +1,10 @@
-import time
 import asyncio
+import time
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from logic import Choice, Game, Options, Player, Round
+import config
+from logic import Choice, Game, Player
 
 
 class GameHelper:
@@ -12,10 +13,9 @@ class GameHelper:
 
     def __init__(self, game: Game) -> None:
         self.game = game
-        self.options = game.options
         self.previous_round = game.start_round()
         self.last_action_time = 0.0
-        self.round_duration = game.options.countdown_duration
+        self.round_duration = config.GAME_ROUND_DURATION
 
     async def start_next_round(self) -> None:
         if (
@@ -25,7 +25,7 @@ class GameHelper:
         ):
             return
         self.game.start_round()
-        self.round_duration = self.options.countdown_duration
+        self.round_duration = config.GAME_ROUND_DURATION
 
     async def finalize_round(self) -> None:
         self.round_duration -= self.LOOP_SLEEP
@@ -59,7 +59,7 @@ class GameHelper:
                 "action": "stats",
                 "message": {
                     "played_rounds": played_rounds,
-                    "total_rounds": self.options.rounds,
+                    "total_rounds": config.GAME_ROUNDS_COUNT,
                     "player_wins": player_wins,
                 },
             },
@@ -75,7 +75,6 @@ class GameHelper:
         while self.game.is_running() or last_loop_is_required:
             last_loop_is_required = self.game.is_running()
             await self.finalize_round()
-            # await self.send_players_stats()
             await self.start_next_round()
 
     async def send_single(self, message: Dict[str, Any], player: Player) -> None:

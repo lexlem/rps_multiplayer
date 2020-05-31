@@ -1,11 +1,12 @@
-import random
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from time import time
-from typing import Any, DefaultDict, List, Optional, Set, Type, Union, cast
+from typing import DefaultDict, List, Optional, Union, cast
 
 from aiohttp import web
+
+import config
 
 
 class PlayerError(Exception):
@@ -91,21 +92,6 @@ class Choice(Enum):
     SCISSORS = Weapon(crushable=True, can_cut=True)
 
 
-@dataclass
-class Options:
-    countdown_duration: float = 10
-    rounds: int = 3
-    threshold: float = 0.5
-
-    def set(self, **kwargs: Any) -> None:
-        for key, value in kwargs.items():
-            try:
-                getattr(self, key)
-                setattr(self, key, value)
-            except AttributeError:
-                raise AttributeError("Cannot set non existing option: {}".format(key))
-
-
 @dataclass(eq=False)
 class Player:
     choice: Optional[Choice] = None
@@ -126,11 +112,10 @@ class Player:
 class Round:
     timings: DefaultDict[Player, float] = defaultdict()
 
-    def __init__(self, players: List[Player], options: Options):
+    def __init__(self, players: List[Player]):
         self.players = players
         for player in self.players:
             player.reset_choice()
-        self.options = options
         self.winners: List[Player] = []
         self.draw: bool = False
 
@@ -156,7 +141,7 @@ class Round:
     def played_on_time(self, player: Player, end_time: float) -> bool:
         NO_TIME = 0
         return (
-            end_time - self.options.countdown_duration
+            end_time - config.GAME_ROUND_DURATION
             < self.timings.get(player, NO_TIME)
             < end_time
         )
@@ -179,7 +164,7 @@ class Round:
             else:
                 return False
         return bool(self.winners or self.draw)
-    
+
     def get_player_round_result(self, player: Player) -> Result:
         if self.draw == True:
             return Result.DRAW
@@ -192,19 +177,15 @@ class Round:
 
 class Game:
     def __init__(self, players):
-        self.options = Options()
         self.players = players
-        self.winner: Optional[Player] = None
+        self.winners: List[Player] = []
         self.rounds: List[Round] = []
         self.current_round: Union[Round, None]
         for player in players:
             player.game = self
 
-    def set_options(self, **kwargs: Any) -> None:
-        self.options.set(**kwargs)
-
     def is_running(self) -> bool:
-        return len(self.rounds) < self.options.rounds
+        return len(self.rounds) < config.GAME_ROUNDS_COUNT
 
     def all_players_played(self) -> bool:
         return all([player.choice for player in self.players])
@@ -215,7 +196,7 @@ class Game:
 
     def start_round(self) -> Round:
         if self.is_running():
-            self.current_round = Round(players=self.players, options=self.options)
+            self.current_round = Round(players=self.players)
             return self.current_round
         else:
             raise GameError("Game already finished")
@@ -230,10 +211,7 @@ class Game:
         max_wins_players = [
             player for player, wins in player_wins.items() if wins == max_wins
         ]
-        if len(max_wins_players) > 1:
-            return
-        else:
-            self.winner = max_wins_players[0]
+        self.winners = max_wins_players
 
     def finish_round(self) -> Round:
         assert self.current_round is not None

@@ -1,0 +1,8 @@
+version: "3"
+services:
+  backend_test:
+    build: ./backend
+    command: pytest tests
+    volumes:
+      - ./backend:/app
+      - ./tests:/tests

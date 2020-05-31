@@ -1,7 +1,6 @@
 import os
 import random
 import json
-import asyncio
 from aiohttp import web
 from aiojobs.aiohttp import spawn
 
@@ -51,8 +50,6 @@ async def wshandler(request):
 
     try:
         print("New player joined.")
-        for player in request.app["players"]:
-            await player.ws.send_str("New player joined")
         request.app["players"].append(new_player)
 
         await spawn(request, game_handler(request))
@@ -80,5 +77,3 @@ async def wshandler(request):
         if new_player in request.app["players"]:
             request.app["players"].remove(new_player)
             print("Someone disconnected.")
-            for player in request.app["players"]:
-                await player.ws.send_str("Someone disconnected.")
