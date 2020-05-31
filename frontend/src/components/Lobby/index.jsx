@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import CSSModules from 'react-css-modules';
-import styles from './styles.sass';
+import './styles.sass';
 
 
-class Lobby extends Component {
+export class Lobby extends Component {
   state = {
-    name: ''
+    name: this.props.playerProfile.name ? this.props.playerProfile.name : ""
   }
 
   onSubmit = (e) => {
@@ -17,18 +17,19 @@ class Lobby extends Component {
   onChange = (e) => this.setState({ [e.target.name]: e.target.value });
 
   handleClick = () => {
-    console.log('значение this:', this);
     this.props.connect();
   }
 
   render() {
     return (
-      <div>
-        <form onSubmit={this.onSubmit} style={{ display: 'flex' }}>
+      <div className="Lobby">
+        <h3>Start playing</h3>
+        <form onSubmit={this.onSubmit} className="playerNameForm">
+          <label for="name">Enter your name</label>
           <input
             type="text"
+            id="name"
             name="name"
-            style={{ flex: '10', padding: '5px' }}
             placeholder="Enter your name"
             value={this.state.name}
             onChange={this.onChange}
@@ -36,14 +37,13 @@ class Lobby extends Component {
           <input
             type="submit"
             value="Submit"
-            className="btn"
-            style={{ flex: '1' }}
+            className="btn btn-primary"
           />
         </form>
-        <button onClick={this.handleClick}>Play game!</button>
+        <button className="btn btn-primary" onClick={this.handleClick}>Play game!</button>
       </div>
     );
   }
 }
 
-export default CSSModules(Lobby, styles);
+export default Lobby;

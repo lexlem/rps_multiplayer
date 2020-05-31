@@ -1,26 +1,30 @@
-import React from 'react';
-import CSSModules from 'react-css-modules';
+import React, { Component } from 'react';
 import styles from './styles.sass';
-import Button from 'components/Button';
 
-const Result = ({ winner, player1Label, player2Label, onClickPlay, loading }) => (
-	<div styleName="Result">
-		{winner !== null && !loading && (
-			<div className="winner">
-				<span>
-					{winner === 0 ? 'TIE' : `${(winner === 1 ? player1Label : player2Label)} WINS`}
-				</span>
+export class Result extends Component {
+
+	render() {
+		return (
+			<div className="Result">
+				{this.props.winner !== null && !this.props.loading && (
+					<div className="winner">
+						<span>
+							{this.props.winner === 0 ? 'TIE' : `${(this.props.winner === 1)} WINS`}
+						</span>
+					</div>
+				)}
+				<div className="btn-play">
+					<button
+						disabled={this.props.loading}
+						onClick={this.props.onClickPlay}
+					>
+						PLAY {(this.props.loading || this.props.winner !== null) && 'AGAIN'}
+					</button>
+				</div>
 			</div>
-		)}
-		<div className="play">
-			<Button
-				disabled={loading}
-				onClick={onClickPlay}
-			>
-				PLAY {(loading || winner !== null) && 'AGAIN'}
-			</Button>
-		</div>
-	</div>
-);
 
-export default CSSModules(Result, styles);
+		)
+	}
+}
+
+export default Result;
