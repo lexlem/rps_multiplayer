@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styles from './styles.sass';
+import './styles.sass';
 
 export class Timer extends Component {
 

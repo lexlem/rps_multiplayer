@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import CSSModules from 'react-css-modules';
 import './styles.sass';
 
 
 export class Lobby extends Component {
   state = {
-    name: this.props.playerProfile.name ? this.props.playerProfile.name : ""
+    name: this.props.playerName ? this.props.playerName : ""
   }
 
   onSubmit = (e) => {
@@ -25,7 +24,7 @@ export class Lobby extends Component {
       <div className="Lobby">
         <h3>Start playing</h3>
         <form onSubmit={this.onSubmit} className="playerNameForm">
-          <label for="name">Enter your name</label>
+          <label htmlFor="name">Enter your name</label>
           <input
             type="text"
             id="name"

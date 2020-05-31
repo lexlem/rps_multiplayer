@@ -1,26 +1,35 @@
 import React, { Component } from 'react';
-import styles from './styles.sass';
+import './styles.sass';
 
 export class Result extends Component {
 
 	render() {
+		const roundResult = this.props.roundResult;
+		const gameResult = this.props.gameResult;
+		let roundResultBlock, gameResultBlock;
+
+		if (roundResult) {
+			roundResultBlock = (<div className="round-results">
+				<h4>Round results</h4>
+				<div>
+					{roundResult}
+				</div>
+			</div>)
+		}
+		if (gameResult) {
+			gameResultBlock = (<div className="game-results">
+				<h4>Game results</h4>
+				<div>
+					{gameResult}
+				</div>
+			</div>
+			)
+		}
+
 		return (
 			<div className="Result">
-				{this.props.winner !== null && !this.props.loading && (
-					<div className="winner">
-						<span>
-							{this.props.winner === 0 ? 'TIE' : `${(this.props.winner === 1)} WINS`}
-						</span>
-					</div>
-				)}
-				<div className="btn-play">
-					<button
-						disabled={this.props.loading}
-						onClick={this.props.onClickPlay}
-					>
-						PLAY {(this.props.loading || this.props.winner !== null) && 'AGAIN'}
-					</button>
-				</div>
+				{roundResultBlock}
+				{gameResultBlock}
 			</div>
 
 		)

@@ -6,8 +6,6 @@ import Timer from "../Timer";
 import Result from "../Result";
 
 export class GameScene extends Component {
- 
-  
 
   render() {
     return (
@@ -15,7 +13,7 @@ export class GameScene extends Component {
         <h3>Game</h3>
         <Timer timer={this.props.timer} />
         <WeaponList onClickWeapon={this.props.onClickWeapon} />
-        <Result results={this.props.results} />
+        <Result roundResult={this.props.roundResult} gameResult={this.props.gameResult} />
       </div>
     );
   }
