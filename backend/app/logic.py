@@ -162,7 +162,7 @@ class Round:
         }
         if all(players_on_time.values()):
             return False
-        elif not all(players_on_time.values()):
+        elif not any(players_on_time.values()):
             self.draw = True
         else:
             played_players = {
@@ -188,6 +188,7 @@ class Game:
     def __init__(self, players):
         self.players = players
         self.winners: List[Player] = []
+        self.game_rounds_count = config.GAME_ROUNDS_COUNT
         self.rounds: List[Round] = []
         self.current_round: Union[Round, None]
         self.isForfeited = False
@@ -196,7 +197,7 @@ class Game:
 
     def is_running(self) -> bool:
         if not self.isForfeited:
-            return len(self.rounds) < config.GAME_ROUNDS_COUNT
+            return len(self.rounds) < self.game_rounds_count
         else:
             return False
 
@@ -238,6 +239,8 @@ class Game:
         finished_round = self.current_round
         finished_round.finalize(forfeited_player)
         self.rounds.append(finished_round)
+        if finished_round.draw:
+            self.game_rounds_count += 1
         self.current_round = None
         self.check_for_winner()
         return finished_round
