@@ -28,6 +28,9 @@ class App extends Component {
 
     conn.onopen = () => {
       this.setState({ ws: conn, isQueued: true });
+      if (this.state.playerName) {
+        conn.send(JSON.stringify({ "action": "player_name", "message": this.state.playerName }));
+      }
     };
 
     conn.onclose = e => {
