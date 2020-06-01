@@ -38,3 +38,9 @@
 ## How to run
 * docker-compose up - развернуть приложение, Frontend будет доступен по http://localhost:3000
 * docker-compose -f docker-compose.test.yml up --build
+
+## Configurations
+You can modify game options in backend/app/config.py
+* GAME_ROUNDS_COUNT - count of a game rounds
+* GAME_PLAYERS_COUNT - count of players involved in a game
+* GAME_ROUND_DURATION - duration of a single round
