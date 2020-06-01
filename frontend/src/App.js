@@ -18,7 +18,8 @@ class App extends Component {
     ws: null,
     currentTimer: 0,
     roundResult: null,
-    gameResult: null
+    roundPlayersChoices: [],
+    gameResult: null,
   };
 
   connect = () => {
@@ -51,12 +52,12 @@ class App extends Component {
       if (data.action === "game_start") {
         this.setState({ isQueued: false, isPlayingGame: true });
       } else if (data.action === "round_result") {
-        if (data.message === 1) {
-          this.setState({ roundResult: "Win" })
-        } else if (data.message === -1) {
-          this.setState({ roundResult: "Loss" })
+        if (data.message.player_result === 1) {
+          this.setState({ roundResult: "Win", roundPlayersChoices: data.message.all_players_choices })
+        } else if (data.message.player_result === -1) {
+          this.setState({ roundResult: "Loss", roundPlayersChoices: data.message.all_players_choices })
         } else {
-          this.setState({ roundResult: "Draw" })
+          this.setState({ roundResult: "Draw", roundPlayersChoices: data.message.all_players_choices })
         }
       } else if (data.action === "timer") {
         this.setState({ currentTimer: data.message })
@@ -123,6 +124,7 @@ class App extends Component {
         onClickWeapon={this.onClickWeapon}
         forfeitGame={this.forfeitGame}
         roundResult={this.state.roundResult}
+        roundPlayersChoices={this.state.roundPlayersChoices}
         gameResult={this.state.gameResult} />;
     } else {
       currentScene = <Lobby

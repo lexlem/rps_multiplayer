@@ -37,13 +37,20 @@ class GameHelper:
         if self.game.current_round and self.round_duration <= 0:
             self.previous_round = self.game.finish_round()
             self.last_action_time = time.time()
+            all_players_choices = {
+                player.name: player.choice.name.lower() if player.choice else None for player in self.game.players
+            }
+            print(all_players_choices)
             for player in self.game.players:
                 await self.send_single(
                     message={
                         "action": "round_result",
-                        "message": self.previous_round.get_player_round_result(
-                            player=player
-                        ).value,
+                        "message": {
+                            "player_result": self.previous_round.get_player_round_result(
+                                player=player
+                            ).value,
+                            "all_players_choices": all_players_choices
+                        },
                     },
                     player=player,
                 )

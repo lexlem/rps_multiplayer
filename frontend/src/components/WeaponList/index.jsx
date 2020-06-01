@@ -5,23 +5,6 @@ import { faHandRock, faHandPaper, faHandScissors } from '@fortawesome/free-solid
 import { Component } from 'react';
 
 export class WeaponList extends Component {
-  state = {
-    weapons: [
-      {
-        id: "rock",
-        icon: "faHandRock"
-      },
-      {
-        id: "paper",
-        icon: "faHandPaper"
-      },
-      {
-        id: "scissors",
-        icon: "faHandScissors"
-      }
-    ]
-  }
-
   render() {
     return (
       <div className="WeaponList">
