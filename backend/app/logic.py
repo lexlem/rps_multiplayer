@@ -124,19 +124,28 @@ class Round:
         if not player.choice:
             player.set_choice(choice)
 
-    def finalize(self) -> None:
-        if not self.find_winner_by_timing():
-            weapons = {player: player.get_selected_weapon() for player in self.players}
+    def finalize(self, forfeited_player: Optional[Player] = None) -> None:
+        if not forfeited_player:
+            if not self.find_winner_by_timing():
+                weapons = {
+                    player: player.get_selected_weapon() for player in self.players
+                }
+                for player in self.players:
+                    enemy_weapons = [
+                        weapon for enemy, weapon in weapons.items() if enemy != player
+                    ]
+                    player_result = player.get_selected_weapon().encounter(
+                        enemy_weapons
+                    )
+                    if player_result == Result.WIN:
+                        self.winners.append(player)
+                    elif player_result == Result.DRAW:
+                        self.draw = True
+                        break
+        else:
             for player in self.players:
-                enemy_weapons = [
-                    weapon for enemy, weapon in weapons.items() if enemy != player
-                ]
-                player_result = player.get_selected_weapon().encounter(enemy_weapons)
-                if player_result == Result.WIN:
+                if player != forfeited_player:
                     self.winners.append(player)
-                elif player_result == Result.DRAW:
-                    self.draw = True
-                    break
 
     def played_on_time(self, player: Player, end_time: float) -> bool:
         NO_TIME = 0
@@ -181,11 +190,15 @@ class Game:
         self.winners: List[Player] = []
         self.rounds: List[Round] = []
         self.current_round: Union[Round, None]
+        self.isForfeited = False
         for player in players:
             player.game = self
 
     def is_running(self) -> bool:
-        return len(self.rounds) < config.GAME_ROUNDS_COUNT
+        if not self.isForfeited:
+            return len(self.rounds) < config.GAME_ROUNDS_COUNT
+        else:
+            return False
 
     def all_players_played(self) -> bool:
         return all([player.choice for player in self.players])
@@ -193,6 +206,11 @@ class Game:
     async def play(self, choice: Choice, player: Player) -> None:
         if self.current_round:
             self.current_round.play(player, choice)
+
+    async def forfeit(self, player: Player) -> None:
+        self.winners = [winner for winner in self.players if winner != player]
+        self.finish_round()
+        self.isForfeited = True
 
     def start_round(self) -> Round:
         if self.is_running():
@@ -204,19 +222,21 @@ class Game:
     def check_for_winner(self) -> None:
         if self.is_running():
             return
-        player_wins = {
-            player: self.get_number_of_wins(player) for player in self.players
-        }
-        max_wins = max(player_wins.values())
-        max_wins_players = [
-            player for player, wins in player_wins.items() if wins == max_wins
-        ]
-        self.winners = max_wins_players
 
-    def finish_round(self) -> Round:
+        if not self.isForfeited:
+            player_wins = {
+                player: self.get_number_of_wins(player) for player in self.players
+            }
+            max_wins = max(player_wins.values())
+            max_wins_players = [
+                player for player, wins in player_wins.items() if wins == max_wins
+            ]
+            self.winners = max_wins_players
+
+    def finish_round(self, forfeited_player: Optional[Player] = None) -> Round:
         assert self.current_round is not None
         finished_round = self.current_round
-        finished_round.finalize()
+        finished_round.finalize(forfeited_player)
         self.rounds.append(finished_round)
         self.current_round = None
         self.check_for_winner()
@@ -226,12 +246,18 @@ class Game:
         return sum([1 for round in self.rounds if player in round.winners])
 
     def get_player_result(self, player: Player) -> Result:
-        player_wins = self.get_number_of_wins(player)
-        max_wins = max([self.get_number_of_wins(player) for player in self.players])
-        if max_wins == 0:
-            return Result.DRAW
+        if not self.isForfeited:
+            player_wins = self.get_number_of_wins(player)
+            max_wins = max([self.get_number_of_wins(player) for player in self.players])
+            if max_wins == 0:
+                return Result.DRAW
+            else:
+                if player_wins == max_wins:
+                    return Result.WIN
+                else:
+                    return Result.LOSE
         else:
-            if player_wins == max_wins:
+            if player in self.winners:
                 return Result.WIN
             else:
                 return Result.LOSE

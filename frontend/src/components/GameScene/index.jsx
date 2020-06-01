@@ -14,6 +14,7 @@ export class GameScene extends Component {
         <Timer timer={this.props.timer} />
         <WeaponList onClickWeapon={this.props.onClickWeapon} />
         <Result roundResult={this.props.roundResult} gameResult={this.props.gameResult} />
+        <button className="btn btn-danger" onClick={() => this.props.forfeitGame()}>Forfeit game</button>
       </div>
     );
   }

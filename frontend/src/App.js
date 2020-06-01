@@ -60,19 +60,20 @@ class App extends Component {
       } else if (data.action === "game_result") {
         if (data.message === "LOSE") {
           this.setState({ playerStats: { ...this.state.playerStats, losses: parseInt(this.state.playerStats.losses) + 1 } });
-          sessionStorage.setItem('rpsPlayerLosses', parseInt(this.state.playerStats.losses) + 1);
+          sessionStorage.setItem('rpsPlayerLosses', parseInt(this.state.playerStats.losses));
         } else if (data.message === "WIN") {
           this.setState({ playerStats: { ...this.state.playerStats, wins: parseInt(this.state.playerStats.wins) + 1 } });
-          sessionStorage.setItem('rpsPlayerWins', parseInt(this.state.playerStats.wins) + 1);
+          sessionStorage.setItem('rpsPlayerWins', parseInt(this.state.playerStats.wins));
         } else {
           this.setState({ playerStats: { ...this.state.playerStats, draws: parseInt(this.state.playerStats.draws) + 1 } });
-          sessionStorage.setItem('rpsPlayerDraws', parseInt(this.state.playerStats.draws) + 1);
+          sessionStorage.setItem('rpsPlayerDraws', parseInt(this.state.playerStats.draws));
         }
         this.setState({ playerStats: { ...this.state.playerStats, totalGames: parseInt(this.state.playerStats.totalGames) + 1 } });
-        sessionStorage.setItem('rpsPlayerTotalGames', parseInt(this.state.playerStats.totalGames) + 1);
+        sessionStorage.setItem('rpsPlayerTotalGames', parseInt(this.state.playerStats.totalGames));
         setTimeout(
           function () {
             this.setState({ isPlayingGame: false, roundResult: null, gameResult: null });
+            this.disconnect();
           }
             .bind(this),
           3000
@@ -97,6 +98,13 @@ class App extends Component {
     this.state.ws.send(JSON.stringify({ "action": "choice", "message": weaponName }));
   };
 
+  forfeitGame = () => {
+    this.state.ws.send(JSON.stringify({ "action": "forfeit" }));
+    this.setState({ playerStats: { ...this.state.playerStats, losses: parseInt(this.state.playerStats.losses) + 1 } });
+    sessionStorage.setItem('rpsPlayerLosses', parseInt(this.state.playerStats.losses));
+    this.setState({ isPlayingGame: false, roundResult: null, gameResult: null });
+  }
+
   render() {
     const isQueued = this.state.isQueued;
     const isPlayingGame = this.state.isPlayingGame;
@@ -104,9 +112,23 @@ class App extends Component {
     if (isQueued) {
       currentScene = <div>Searching for opponents</div>
     } else if (isPlayingGame) {
-      currentScene = <GameScene playerName={this.state.playerName} playerStats={this.state.playerStats} ws={this.state.ws} timer={this.state.currentTimer} onClickWeapon={this.onClickWeapon} roundResult={this.state.roundResult} gameResult={this.state.gameResult} />;
+      currentScene = <GameScene
+        playerName={this.state.playerName}
+        playerStats={this.state.playerStats}
+        ws={this.state.ws}
+        timer={this.state.currentTimer}
+        onClickWeapon={this.onClickWeapon}
+        forfeitGame={this.forfeitGame}
+        roundResult={this.state.roundResult}
+        gameResult={this.state.gameResult} />;
     } else {
-      currentScene = <Lobby playerName={this.state.playerName} playerStats={this.state.playerStats} ws={this.state.ws} setName={this.setName} connect={this.connect} disconnect={this.disconnect} />;
+      currentScene = <Lobby
+        playerName={this.state.playerName}
+        playerStats={this.state.playerStats}
+        ws={this.state.ws}
+        setName={this.setName}
+        connect={this.connect}
+        disconnect={this.disconnect} />;
     }
 
     return (

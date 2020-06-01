@@ -59,6 +59,8 @@ async def wshandler(request):
                 message_data = json.loads(msg.data)
                 if message_data.get("action") == "choice":
                     await new_player.game.play(Choice[message_data["message"].upper()], new_player)
+                elif message_data.get("action") == "forfeit":
+                    await new_player.game.forfeit(new_player)
                 else:
                     for player in request.app["players"]:
                         if player.ws is not new_player.ws:
