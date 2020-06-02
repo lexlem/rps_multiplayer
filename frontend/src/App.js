@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import GameScene from './components/GameScene';
-import Lobby from './components/Lobby';
+import { GameScene } from './components/GameScene';
+import { Lobby } from './components/Lobby';
+import { PlayerProfile } from './components/PlayerProfile';
 
 import './App.sass';
 
@@ -139,15 +140,10 @@ class App extends Component {
     return (
       <div className="App">
         <article className="container">
-          <section className="profile">
-            <h3>Your profile</h3>
-            <p className="profileName">Your name: {this.state.playerName}</p>
-            <div className="profileStats">
-              <p>Total games: {this.state.playerStats.totalGames}</p>
-              <p>Wins: {this.state.playerStats.wins}</p>
-              <p>Losses: {this.state.playerStats.losses}</p>
-              <p>Draws: {this.state.playerStats.draws}</p>
-            </div>
+          <section>
+            <PlayerProfile
+              playerName={this.state.playerName}
+              playerStats={this.state.playerStats} />
           </section>
           <section>
             {currentScene}
