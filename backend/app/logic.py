@@ -1,5 +1,5 @@
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from time import time
 from typing import DefaultDict, List, Optional, Union, cast
@@ -175,7 +175,7 @@ class Round:
         return bool(self.winners or self.draw)
 
     def get_player_round_result(self, player: Player) -> Result:
-        if self.draw == True:
+        if self.draw:
             return Result.DRAW
         else:
             if player in self.winners:

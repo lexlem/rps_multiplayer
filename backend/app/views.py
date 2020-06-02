@@ -23,7 +23,7 @@ async def game_handler(request):
         )
         for player in participating_players:
             await player.ws.send_json(
-                {"action": "game_start", "message": "Game started",}
+                {"action": "game_start", "message": "Game started"}
             )
         await GameHelper(game).start_game(request.app)
         for player in game.players:
@@ -58,7 +58,9 @@ async def wshandler(request):
             if msg.type == web.WSMsgType.TEXT:
                 message_data = json.loads(msg.data)
                 if message_data.get("action") == "choice":
-                    await new_player.game.play(Choice[message_data["message"].upper()], new_player)
+                    await new_player.game.play(
+                        Choice[message_data["message"].upper()], new_player
+                    )
                 elif message_data.get("action") == "forfeit":
                     await new_player.game.forfeit(new_player)
                 elif message_data.get("action") == "player_name":

@@ -1,6 +1,5 @@
 import asyncio
 import time
-from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import config
@@ -8,7 +7,7 @@ from logic import Choice, Game, Player
 
 
 class GameHelper:
-    WAIT_BEFORE_CONTINUE = 2  #  sec
+    WAIT_BEFORE_CONTINUE = 2
     LOOP_SLEEP = 1
 
     def __init__(self, game: Game) -> None:
@@ -38,7 +37,8 @@ class GameHelper:
             self.previous_round = self.game.finish_round()
             self.last_action_time = time.time()
             all_players_choices = {
-                player.name: player.choice.name.lower() if player.choice else None for player in self.game.players
+                player.name: player.choice.name.lower() if player.choice else None
+                for player in self.game.players
             }
             print(all_players_choices)
             for player in self.game.players:
@@ -49,7 +49,7 @@ class GameHelper:
                             "player_result": self.previous_round.get_player_round_result(
                                 player=player
                             ).value,
-                            "all_players_choices": all_players_choices
+                            "all_players_choices": all_players_choices,
                         },
                     },
                     player=player,
@@ -85,7 +85,7 @@ class GameHelper:
             await self.start_next_round()
 
     async def send_single(self, message: Dict[str, Any], player: Player) -> None:
-        await player.ws.send_json(message)
+        await player.ws.send_json(message)  # type: ignore
 
     async def send_all(self, message: Dict[str, Any], except_: List[Player]) -> None:
         for player in self.game.players:
