@@ -9,7 +9,7 @@ class App extends Component {
   state = {
     isQueued: false,
     isPlayingGame: false,
-    playerName: sessionStorage.getItem('rpsPlayerWins') ? sessionStorage.getItem('rpsPlayerWins') : "Player #" + this.getRandomInt(0, 32767),
+    playerName: sessionStorage.getItem('rpsPlayerName') ? sessionStorage.getItem('rpsPlayerName') : "Player #" + this.getRandomInt(0, 32767),
     playerStats: {
       wins: sessionStorage.getItem('rpsPlayerWins') ? sessionStorage.getItem('rpsPlayerWins') : 0,
       losses: sessionStorage.getItem('rpsPlayerLosses') ? sessionStorage.getItem('rpsPlayerLosses') : 0,

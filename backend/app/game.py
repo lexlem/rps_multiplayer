@@ -40,7 +40,6 @@ class GameHelper:
                 player.name: player.choice.name.lower() if player.choice else None
                 for player in self.game.players
             }
-            print(all_players_choices)
             for player in self.game.players:
                 await self.send_single(
                     message={
