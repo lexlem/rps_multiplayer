@@ -10,17 +10,17 @@ export class WeaponList extends Component {
       <div className="WeaponList">
         <ul>
           <li>
-            <button className="btn-weapon" onClick={() => this.props.onClickWeapon("rock")}>
+            <button className="btn-weapon" onClick={() => this.props.chooseWeapon("rock")}>
               <FontAwesomeIcon icon={faHandRock} size="5x" />
             </button>
           </li>
           <li>
-            <button className="btn-weapon" onClick={() => this.props.onClickWeapon("paper")}>
+            <button className="btn-weapon" onClick={() => this.props.chooseWeapon("paper")}>
               <FontAwesomeIcon icon={faHandPaper} size="5x" />
             </button>
           </li>
           <li>
-            <button className="btn-weapon" onClick={() => this.props.onClickWeapon("scissors")}>
+            <button className="btn-weapon" onClick={() => this.props.chooseWeapon("scissors")}>
               <FontAwesomeIcon icon={faHandScissors} size="5x" />
             </button>
           </li>

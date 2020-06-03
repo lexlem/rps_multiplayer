@@ -9,7 +9,7 @@ class App extends Component {
   state = {
     isQueued: false,
     isPlayingGame: false,
-    playerName: sessionStorage.getItem('rpsPlayerName'),
+    playerName: sessionStorage.getItem('rpsPlayerWins') ? sessionStorage.getItem('rpsPlayerWins') : "Player #" + this.getRandomInt(0, 32767),
     playerStats: {
       wins: sessionStorage.getItem('rpsPlayerWins') ? sessionStorage.getItem('rpsPlayerWins') : 0,
       losses: sessionStorage.getItem('rpsPlayerLosses') ? sessionStorage.getItem('rpsPlayerLosses') : 0,
@@ -22,6 +22,12 @@ class App extends Component {
     roundPlayersChoices: [],
     gameResult: null,
   };
+
+  getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
   connect = () => {
     this.disconnect();
@@ -99,7 +105,7 @@ class App extends Component {
     this.setState({ playerName: name });
   };
 
-  onClickWeapon = weaponName => {
+  chooseWeapon = weaponName => {
     this.state.ws.send(JSON.stringify({ "action": "choice", "message": weaponName }));
   };
 
@@ -122,7 +128,7 @@ class App extends Component {
         playerStats={this.state.playerStats}
         ws={this.state.ws}
         timer={this.state.currentTimer}
-        onClickWeapon={this.onClickWeapon}
+        chooseWeapon={this.chooseWeapon}
         forfeitGame={this.forfeitGame}
         roundResult={this.state.roundResult}
         roundPlayersChoices={this.state.roundPlayersChoices}

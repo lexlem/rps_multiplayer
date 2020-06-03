@@ -19,7 +19,7 @@ export class GameScene extends Component {
       <div className="GameScene">
         <h3>Game</h3>
         <Timer timer={this.props.timer} />
-        <WeaponList onClickWeapon={this.props.onClickWeapon} />
+        <WeaponList chooseWeapon={this.props.chooseWeapon} />
         <Result roundResult={this.props.roundResult} roundPlayersChoices={this.props.roundPlayersChoices} gameResult={this.props.gameResult} />
         {forfeitButton}
       </div>
