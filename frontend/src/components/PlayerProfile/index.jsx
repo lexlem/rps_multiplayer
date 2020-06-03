@@ -2,21 +2,17 @@ import React, { Component } from 'react';
 import './styles.sass';
 
 export class PlayerProfile extends Component {
-	state = {
-		playerName: this.props.playerName,
-		playerStats: this.props.playerStats
-	}
 
 	render() {
 		return (
 			<div className="profile">
 				<h3>Your profile</h3>
-				<p className="profileName">Your name: {this.state.playerName}</p>
+				<p className="profileName">Your name: {this.props.playerName}</p>
 				<div className="profileStats">
-					<p>Total games: {this.state.playerStats.totalGames}</p>
-					<p>Wins: {this.state.playerStats.wins}</p>
-					<p>Losses: {this.state.playerStats.losses}</p>
-					<p>Draws: {this.state.playerStats.draws}</p>
+					<p>Total games: {this.props.playerStats.totalGames}</p>
+					<p>Wins: {this.props.playerStats.wins}</p>
+					<p>Losses: {this.props.playerStats.losses}</p>
+					<p>Draws: {this.props.playerStats.draws}</p>
 				</div>
 			</div>
 		)

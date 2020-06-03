@@ -30,7 +30,6 @@ export class Lobby extends Component {
             id="name"
             name="name"
             placeholder="Enter your name"
-            value={this.state.name}
             onChange={this.onChange}
           />
           <input
